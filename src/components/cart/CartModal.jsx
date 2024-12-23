@@ -35,7 +35,7 @@ const CartModal = ({ onClose }) => {
       `*Novo Pedido*\n\n${orderDetails}\n\nTotal: ${formatPrice(calculateTotal())}${deliveryInfo}${paymentInfo}`
     );
     
-    window.open(`https://wa.me/5585991993833?text=${message}`, '_blank');
+    window.open(`https://wa.me/5585988098826?text=${message}`, '_blank');
     onClose();
   };
 
