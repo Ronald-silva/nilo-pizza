@@ -5,6 +5,10 @@ import CartModal from './cart/CartModal';
 import { useCart } from '../hooks/useCart';
 import { menuData } from '../data/menuData';
 
+{Object.keys(menuData).map(category => (
+  <MenuSection key={category} title={category} />
+))}
+
 const NiloPizzaDelivery = () => {
   const { cart, isCartOpen, setIsCartOpen } = useCart();
 
