@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { X, Plus, Minus, MapPin, Clock, ShoppingCart } from 'lucide-react';
 import { useCart } from '../../hooks/useCart';
 
+const STORE_ADDRESS = "Xavier da silveira 1811- Santa Cecília";
+
 const CartModal = () => {
   const { 
     cart,
