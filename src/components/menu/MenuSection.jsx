@@ -42,7 +42,7 @@ const MenuSection = ({ title, items }) => {
             )}
           </div>
 
-          <div className="flex flex-wrap px-4">
+          <div className="flex flex-wrap gap-4 justify-center">
             {items.map(item => (
               <div
                 key={item.id}

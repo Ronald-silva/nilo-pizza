@@ -112,5 +112,8 @@ export const useCart = create((set, get) => ({
       paymentMethod: 'pix',
       deliveryType: 'delivery'
     });
-  }
+  },
+
+  setDeliveryType: (type) => set({ deliveryType: type })
 }));
+
