@@ -1,3 +1,4 @@
+// src/components/menu/HalfPizzaModal.jsx
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { useCart } from '../../hooks/useCart';
@@ -9,11 +10,12 @@ const HalfPizzaModal = ({ onClose }) => {
   const [secondHalf, setSecondHalf] = useState(null);
   const { addHalfPizza } = useCart();
 
-  // Combinar todas as pizzas disponíveis para meio a meio (exceto calzones e doces)
+  // Combinar todas as pizzas disponíveis (incluindo doces)
   const availablePizzas = [
-    ...menuData.promocao || [],
+    ...menuData.promoção || [],
     ...menuData.tradicionais || [],
-    ...menuData.especiais || []
+    ...menuData.especiais || [],
+    ...menuData.doces || []
   ];
 
   const handleSelectFirst = (pizza) => {
@@ -23,14 +25,15 @@ const HalfPizzaModal = ({ onClose }) => {
 
   const handleSelectSecond = (pizza) => {
     setSecondHalf(pizza);
-    // Calcular preço e adicionar ao carrinho
     addHalfPizza(firstHalf, pizza);
     onClose();
   };
 
-  const getHighestPrice = () => {
-    if (!firstHalf || !secondHalf) return 0;
-    return Math.max(firstHalf.price, secondHalf.price);
+  const calculateTotalPrice = () => {
+    if (!firstHalf || !secondHalf) {
+      return firstHalf ? firstHalf.price / 2 : 0;
+    }
+    return (firstHalf.price / 2) + (secondHalf.price / 2);
   };
 
   return (
@@ -53,29 +56,31 @@ const HalfPizzaModal = ({ onClose }) => {
               <div className="flex gap-4">
                 <div className="flex-1 p-4 bg-white rounded border">
                   <p className="font-medium">Primeiro Sabor:</p>
-                  {firstHalf ? (
+                  {firstHalf && (
                     <div>
                       <p className="text-lg">{firstHalf.name}</p>
                       <p className="text-sm text-gray-600">{firstHalf.description}</p>
+                      <p className="text-sm text-red-600 mt-1">
+                        R$ {(firstHalf.price / 2).toFixed(2)} (metade)
+                      </p>
                     </div>
-                  ) : (
-                    <p className="text-gray-400">Selecione o primeiro sabor</p>
                   )}
                 </div>
                 <div className="flex-1 p-4 bg-white rounded border">
                   <p className="font-medium">Segundo Sabor:</p>
-                  {secondHalf ? (
+                  {secondHalf && (
                     <div>
                       <p className="text-lg">{secondHalf.name}</p>
                       <p className="text-sm text-gray-600">{secondHalf.description}</p>
+                      <p className="text-sm text-red-600 mt-1">
+                        R$ {(secondHalf.price / 2).toFixed(2)} (metade)
+                      </p>
                     </div>
-                  ) : (
-                    <p className="text-gray-400">Selecione o segundo sabor</p>
                   )}
                 </div>
               </div>
               <p className="mt-4 text-right font-bold">
-                Preço: R$ {getHighestPrice().toFixed(2)}
+                Preço Total: R$ {calculateTotalPrice().toFixed(2)}
               </p>
             </div>
           )}
@@ -91,7 +96,9 @@ const HalfPizzaModal = ({ onClose }) => {
               >
                 <h3 className="font-bold">{pizza.name}</h3>
                 <p className="text-sm text-gray-600">{pizza.description}</p>
-                <p className="text-red-600 font-bold mt-2">R$ {pizza.price.toFixed(2)}</p>
+                <p className="text-red-600 font-bold mt-2">
+                  R$ {(pizza.price / 2).toFixed(2)} (metade)
+                </p>
               </button>
             ))}
           </div>

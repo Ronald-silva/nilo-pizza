@@ -1,32 +1,68 @@
+// src/hooks/useCart.jsx
 import { create } from 'zustand';
+import axios from 'axios';
 
 const STORE_ADDRESS = "Xavier da silveira 1811- Santa Cecília";
-const DELIVERY_RATE_PER_KM = 1;
+const DELIVERY_TIERS = {
+  TIER_1: { maxDistance: 2000, fee: 3 }, // 2km em metros
+  TIER_2: { maxDistance: 4000, fee: 6 }  // 4km em metros
+};
 
 export const useCart = create((set, get) => ({
   cart: [],
   isCartOpen: false,
   deliveryAddress: '',
   distance: 0,
+  routeDistance: 0,
   paymentAmount: 0,
   paymentMethod: 'pix',
   isHalfPizzaModalOpen: false,
   deliveryType: 'delivery',
 
   setIsCartOpen: (isOpen) => set({ isCartOpen: isOpen }),
+  
   setHalfPizzaModalOpen: (isOpen) => set({ isHalfPizzaModalOpen: isOpen }),
   
   setDeliveryAddress: async (address) => {
     if (!address) {
-      set({ deliveryAddress: '', distance: 0 });
+      set({ deliveryAddress: '', distance: 0, routeDistance: 0 });
       return;
     }
-    // Simulação de cálculo de distância - implementar API Google Maps
-    const distance = 17; // Valor fixo para teste
-    set({ deliveryAddress: address, distance });
+
+    try {
+      const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+      const response = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json`, {
+        params: {
+          origins: STORE_ADDRESS,
+          destinations: address,
+          mode: 'driving',
+          key: apiKey
+        }
+      });
+
+      if (response.data.status === "OK") {
+        const routeData = response.data.rows[0].elements[0];
+        if (routeData.status === "OK") {
+          const distanceInMeters = routeData.distance.value;
+          set({ 
+            deliveryAddress: address, 
+            distance: distanceInMeters / 1000,
+            routeDistance: distanceInMeters
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao calcular rota:", error);
+      set({ 
+        deliveryAddress: address,
+        distance: 0,
+        routeDistance: 0
+      });
+    }
   },
 
   setPaymentMethod: (method) => set({ paymentMethod: method }),
+  
   setPaymentAmount: (amount) => set({ paymentAmount: parseFloat(amount) || 0 }),
   
   addToCart: (item) => {
@@ -47,17 +83,28 @@ export const useCart = create((set, get) => ({
   },
 
   addHalfPizza: (firstHalf, secondHalf) => {
-    const highestPrice = Math.max(firstHalf.price, secondHalf.price);
+    const firstHalfPrice = firstHalf.price / 2;
+    const secondHalfPrice = secondHalf.price / 2;
+    const totalPrice = firstHalfPrice + secondHalfPrice;
+    
     const halfPizzaId = `half-${firstHalf.id}-${secondHalf.id}`;
     
     const halfPizza = {
       id: halfPizzaId,
       name: `Pizza Meio a Meio`,
-      price: highestPrice,
+      price: totalPrice,
       description: `½ ${firstHalf.name} + ½ ${secondHalf.name}`,
       details: {
-        firstHalf: { name: firstHalf.name, description: firstHalf.description },
-        secondHalf: { name: secondHalf.name, description: secondHalf.description }
+        firstHalf: { 
+          name: firstHalf.name, 
+          description: firstHalf.description,
+          price: firstHalfPrice 
+        },
+        secondHalf: { 
+          name: secondHalf.name, 
+          description: secondHalf.description,
+          price: secondHalfPrice 
+        }
       },
       isHalfPizza: true
     };
@@ -91,7 +138,13 @@ export const useCart = create((set, get) => ({
 
   getDeliveryFee: () => {
     if (get().deliveryType === 'pickup') return 0;
-    return get().distance * DELIVERY_RATE_PER_KM;
+    
+    const distanceInMeters = get().routeDistance;
+    
+    if (distanceInMeters <= DELIVERY_TIERS.TIER_1.maxDistance) {
+      return DELIVERY_TIERS.TIER_1.fee;
+    }
+    return DELIVERY_TIERS.TIER_2.fee;
   },
 
   getTotal: () => {
@@ -108,6 +161,7 @@ export const useCart = create((set, get) => ({
       cart: [],
       deliveryAddress: '',
       distance: 0,
+      routeDistance: 0,
       paymentAmount: 0,
       paymentMethod: 'pix',
       deliveryType: 'delivery'
@@ -116,4 +170,3 @@ export const useCart = create((set, get) => ({
 
   setDeliveryType: (type) => set({ deliveryType: type })
 }));
-

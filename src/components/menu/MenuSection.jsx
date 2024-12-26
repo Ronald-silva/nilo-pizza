@@ -1,3 +1,4 @@
+// src/components/menu/MenuSection.jsx
 import React from 'react';
 import { Plus, Split } from 'lucide-react';
 import { useCart } from '../../hooks/useCart';
@@ -9,8 +10,6 @@ const MenuSection = ({ title, items }) => {
     isHalfPizzaModalOpen, 
     setHalfPizzaModalOpen 
   } = useCart();
-
-  const isHalfPizzaAvailable = title.toLowerCase() !== 'calzones' && title.toLowerCase() !== 'doces';
 
   return (
     <div className="mb-8 relative">
@@ -31,15 +30,13 @@ const MenuSection = ({ title, items }) => {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-6 px-4">
             <h2 className="text-2xl font-bold text-white capitalize">{title}</h2>
-            {isHalfPizzaAvailable && (
-              <button
-                onClick={() => setHalfPizzaModalOpen(true)}
-                className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-colors"
-              >
-                <Split className="inline-block mr-2 h-4 w-4" />
-                Meio a Meio
-              </button>
-            )}
+            <button
+              onClick={() => setHalfPizzaModalOpen(true)}
+              className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-colors"
+            >
+              <Split className="inline-block mr-2 h-4 w-4" />
+              Meio a Meio
+            </button>
           </div>
 
           <div className="flex flex-wrap gap-4 justify-center">
